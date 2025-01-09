@@ -5,17 +5,14 @@ module.exports = function gmstrftime(format, timestamp) {
   // bugfixed by: Brett Zamir (https://brett-zamir.me)
   //   example 1: gmstrftime("%A", 1062462400)
   //   returns 1: 'Tuesday'
+  // improved by: Markus Marchewa
+  //   example 2: (() => {let e = process.env, tz = e.TZ; e.TZ = 'Europe/Vienna'; let r = gmstrftime('%F %T %z', 1680300000); e.TZ = tz; return r;})();
+  //   returns 2: '2023-03-31 22:00:00 +0000'
 
   const strftime = require('../datetime/strftime')
 
-  const _date =
-    typeof timestamp === 'undefined'
-      ? new Date()
-      : timestamp instanceof Date
-        ? new Date(timestamp)
-        : new Date(timestamp * 1000)
+  // issue: `%z` should print '+0000' but actually depended on `Date.getTimezoneOffset()`
+  // solution: move everything to `strftime`, pass an object with a flag
 
-  timestamp = Date.parse(_date.toUTCString().slice(0, -4)) / 1000
-
-  return strftime(format, timestamp)
+  return strftime(format, {timestamp, utc: true})
 }

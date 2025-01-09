@@ -36,6 +36,8 @@ module.exports = function strftime(fmt, timestamp) {
   const locale = $locutus.php.localeCategories.LC_TIME
   const lcTime = $locutus.php.locales[locale].LC_TIME
 
+  let tzo, utc;
+
   var _formats = {
     a: function (d) {
       return lcTime.a[d.getDay()]
@@ -145,7 +147,7 @@ module.exports = function strftime(fmt, timestamp) {
     },
     Y: 'getFullYear',
     z: function (d) {
-      const o = d.getTimezoneOffset()
+      const o = tzo
       const H = _xPad(parseInt(Math.abs(o / 60), 10), 0)
       const M = _xPad(o % 60, 0)
       return (o > 0 ? '-' : '+') + H + M
@@ -158,12 +160,26 @@ module.exports = function strftime(fmt, timestamp) {
     },
   }
 
+  if ((typeof timestamp === 'object') && !(timestamp instanceof Date) && (typeof timestamp['timestamp'] !== 'undefined')) {
+    utc = timestamp['utc']
+    timestamp = timestamp['timestamp']
+  }
+
   const _date =
     typeof timestamp === 'undefined'
       ? new Date()
       : timestamp instanceof Date
         ? new Date(timestamp)
         : new Date(timestamp * 1000)
+
+  tzo = _date.getTimezoneOffset()
+
+  // TODO: shifting the timestamp seems to be a hack, switching to JS's `getUTC…` methods might be better.
+  //  but keep in mind that PHP's `gmstrftime` seems to work similar, since its `%s` shows a shifted value too ...
+  if (tzo && utc) {
+    _date.setTime(_date.getTime() + tzo * 60000)
+    tzo = 0
+  }
 
   const _aggregates = {
     c: 'locale',

@@ -16,4 +16,10 @@ describe('src/php/datetime/gmstrftime.js (tested in test/generated/php/datetime/
     expect(result).to.deep.equal(expected)
     done()
   })
+  it('should pass example 2', function (done) {
+    var expected = '2023-03-31 22:00:00 +0000'
+    var result = (() => {let e = process.env, tz = e.TZ; e.TZ = 'Europe/Vienna'; let r = gmstrftime('%F %T %z', 1680300000); e.TZ = tz; return r;})();
+    expect(result).to.deep.equal(expected)
+    done()
+  })
 })
