@@ -78,6 +78,12 @@ module.exports = function strftime(fmt, timestamp) {
       return _xPad(I === 0 ? 12 : I, 0)
     },
     j: function (d) {
+      // let ms = d - new Date('' + d.getFullYear() + '/1/1 GMT')
+      // // Line differs from Yahoo implementation which would be
+      // // equivalent to replacing it here with:
+      // ms += d.getTimezoneOffset() * 60000
+      // const doy = parseInt(ms / 60000 / 60 / 24, 10) + 1
+
       // calculate the difference between the given date and the start of the year (in localtime), DST shifts may lead
       // to deltas less than multiples of 24 hours (the day when DST starts has just 23 hours), compensate by adding
       // the difference between timezone offsets (subtract since values are negative for positive offsets), e.g.:
@@ -87,6 +93,7 @@ module.exports = function strftime(fmt, timestamp) {
       const ms = d - b - (d.getTimezoneOffset() - b.getTimezoneOffset()) * 60000
       const doy = parseInt(ms / 60000 / 60 / 24, 10) + 1
       return _xPad(doy, 0, 100)
+      // return _xPad(doy, 0, 100) + ' ' + (ms/86400000+1).toFixed(3) + ' ' + ((ms / 60000 / 60) % 24).toFixed(2)
     },
     k: ['getHours', '0'],
     // not in PHP, but implemented here (as in Yahoo)
